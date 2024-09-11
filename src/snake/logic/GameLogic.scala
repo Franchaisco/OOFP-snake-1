@@ -6,6 +6,7 @@ import snake.game.SnakeGame
 import snake.logic.GameLogic._
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 
 
@@ -21,6 +22,8 @@ class GameLogic(val random: RandomGenerator,
   var curDir: Direction = East()
   var curPoint: Point = Point(0, 0)
   var applePoint: Point = Point(3, 0)
+  var bodyLength = 2
+  var positionVec : ArrayBuffer[Point]  = ArrayBuffer()
 
 
   def gameOver: Boolean = false
@@ -44,10 +47,26 @@ class GameLogic(val random: RandomGenerator,
     else if (curPoint.y == gridDims.height) {
       curPoint = Point(curPoint.x, 0)
     }
+    positionVec += curPoint
   }
 
-  def changeApplePoint(): Unit = {
-    applePoint = Point(random.randomInt(gridDims.width - 1), random.randomInt(gridDims.height - 1))
+  def createSnakeBody(curPosition : Point) : CellType = {
+    for(i <- 0 to  bodyLength)
+      {
+        val curPos = positionVec(positionVec.size - (i + 1))
+        if(curPosition == curPos)
+          {
+            SnakeBody()
+          }
+      }
+
+
+    Empty()
+  }
+  def changeApplePoint(): CellType = {
+    var nrFreeSpots = 0
+
+    Apple()
   }
 
 
@@ -66,27 +85,28 @@ class GameLogic(val random: RandomGenerator,
   def getCellType(p: Point): CellType = (
     if (p == curPoint) {
       SnakeHead(curDir)
+      createSnakeBody(p)
     }
 
     else if (curPoint == applePoint) {
         changeApplePoint()
-        Apple()
     }
     else if (p == applePoint) {
         Apple()
     }
-    else if (p.x == curPoint.x - 1 && p.y == curPoint.y && curDir == East()) {
-      SnakeBody()
-    }
-    else if (p.x == curPoint.x + 1 && p.y == curPoint.y && curDir == West()) {
-      SnakeBody()
-    }
-    else if (p.x == curPoint.x && p.y == curPoint.y - 1 && curDir == South()) {
-      SnakeBody()
-    }
-    else if (p.x == curPoint.x && p.y == curPoint.y + 1 && curDir == North()) {
-      SnakeBody()
-    }
+
+//    else if (p.x == curPoint.x - 1 && p.y == curPoint.y && curDir == East()) {
+//      SnakeBody()
+//    }
+//    else if (p.x == curPoint.x + 1 && p.y == curPoint.y && curDir == West()) {
+//      SnakeBody()
+//    }
+//    else if (p.x == curPoint.x && p.y == curPoint.y - 1 && curDir == South()) {
+//      SnakeBody()
+//    }
+//    else if (p.x == curPoint.x && p.y == curPoint.y + 1 && curDir == North()) {
+//      SnakeBody()
+//    }
     else {
       Empty()
     }
