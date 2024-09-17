@@ -22,7 +22,7 @@ class GameLogic(val random: RandomGenerator,
   var curDir: Direction = East()
   var curPoint: Point = Point(2, 0)
   var applePoint: Point = changeApplePoint()
-  var snakeBody: List[Point] = List[Point](Point(2, 0), Point(1, 0))
+  var snakeBody: List[Point] = List[Point](Point(2, 0), Point(1, 0), Point(0, 0))
 
 
   def gameOver: Boolean = false
@@ -46,6 +46,10 @@ class GameLogic(val random: RandomGenerator,
     }
 
     nextPoint
+  }
+
+  def expandSnake(newCurPoint : Point) : Unit = {
+    snakeBody = newCurPoint :: snakeBody
   }
   def step(): Unit = {
     var appleEaten = false
@@ -72,7 +76,6 @@ class GameLogic(val random: RandomGenerator,
 
     val newCurPoint = computeNextPoint()
 
-    snakeBody = newCurPoint :: snakeBody
 
 
 
@@ -81,11 +84,7 @@ class GameLogic(val random: RandomGenerator,
 
 
 
-  def createSnakeBody(curPosition : Point) : CellType = {
 
-
-    Empty()
-  }
   def changeApplePoint(): Point = {
     var nrFreeSpots = 0
     var occupiedSpots = 0
