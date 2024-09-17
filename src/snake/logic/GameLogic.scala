@@ -20,18 +20,35 @@ import scala.collection.mutable.ArrayBuffer
 class GameLogic(val random: RandomGenerator,
                          val gridDims : Dimensions) {
   var curDir: Direction = East()
-  var curPoint: Point = Point(0, 0)
-  var applePoint: Point = Point(3, 0)
-  var places : Array[Array[Point]] = Array.ofDim[Point](gridDims.width, gridDims.height)
-  var bodyLength = 2
+  var curPoint: Point = Point(2, 0)
+  var applePoint: Point = changeApplePoint()
+//  var snakeBody:
 
 
   def gameOver: Boolean = false
 
   // TODO implement me
+
+  def computeNextPoint(): Point = {
+    var nextPoint: Point = Point(0, 0)
+
+    if (curDir == East()) {
+      nextPoint = Point(curPoint.x - 1, curPoint.y)
+    }
+    else if (curDir == West()) {
+      nextPoint = Point(curPoint.x + 1, curPoint.y)
+    }
+    else if (curDir == South()) {
+      nextPoint = Point(curPoint.x, curPoint.y - 1)
+    }
+    else if (curDir == North()) {
+      nextPoint = Point(curPoint.x, curPoint.y + 1)
+    }
+
+    nextPoint
+  }
   def step(): Unit = {
-
-
+    var appleEaten = false
     curPoint = Point(curPoint.x + curDir.toPoint.x, curPoint.y + curDir.toPoint.y)
 
 
@@ -47,19 +64,49 @@ class GameLogic(val random: RandomGenerator,
     else if (curPoint.y == gridDims.height) {
       curPoint = Point(curPoint.x, 0)
     }
+
+    else if (curPoint == applePoint) {
+      applePoint = changeApplePoint()
+      appleEaten = true
+    }
+
+
+
   }
+
+
+
 
   def createSnakeBody(curPosition : Point) : CellType = {
 
 
     Empty()
   }
-  def changeApplePoint(p : Point): CellType = {
+  def changeApplePoint(): Point = {
     var nrFreeSpots = 0
+    var occupiedSpots = 0
 
-    nrFreeSpots = gridDims.width * gridDims.height
+    var freeSpots = ArrayBuffer[Point]()
 
-    Apple()
+    for(i <- gridDims.allPointsInside)
+      {
+        if(i != curPoint)
+          {
+            freeSpots += i
+          }
+        if(i == curPoint)
+          {
+            occupiedSpots += 1
+          }
+      }
+
+
+    nrFreeSpots = (gridDims.allPointsInside.size - 1) - occupiedSpots
+    val newSpot = freeSpots(random.randomInt(nrFreeSpots))
+
+
+    newSpot
+
   }
 
 
@@ -80,25 +127,12 @@ class GameLogic(val random: RandomGenerator,
       SnakeHead(curDir)
     }
 
-    else if (curPoint == applePoint) {
-        changeApplePoint(p)
-    }
+
+
     else if (p == applePoint) {
-        Apple()
+      Apple()
     }
 
-//    else if (p.x == curPoint.x - 1 && p.y == curPoint.y && curDir == East()) {
-//      SnakeBody()
-//    }
-//    else if (p.x == curPoint.x + 1 && p.y == curPoint.y && curDir == West()) {
-//      SnakeBody()
-//    }
-//    else if (p.x == curPoint.x && p.y == curPoint.y - 1 && curDir == South()) {
-//      SnakeBody()
-//    }
-//    else if (p.x == curPoint.x && p.y == curPoint.y + 1 && curDir == North()) {
-//      SnakeBody()
-//    }
     else {
       Empty()
     }
