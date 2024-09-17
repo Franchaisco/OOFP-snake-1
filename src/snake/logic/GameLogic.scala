@@ -21,39 +21,37 @@ class GameLogic(val random: RandomGenerator,
                          val gridDims : Dimensions) {
   var curDir: Direction = East()
   var curPoint: Point = Point(2, 0)
+  var snakeBodyParts: List[Point] = List(Point(2, 0), Point(1, 0), Point(0, 0))
   var applePoint: Point = changeApplePoint()
-  var snakeBody: List[Point] = List[Point](Point(2, 0), Point(1, 0), Point(0, 0))
+  var expansion = 3
+  var gameIsOver = false
 
 
-  def gameOver: Boolean = false
 
-  // TODO implement me
-
-  def computeNextPoint(): Point = {
-    var nextPoint: Point = Point(0, 0)
-
-    if (curDir == East()) {
-      nextPoint = Point(curPoint.x - 1, curPoint.y)
-    }
-    else if (curDir == West()) {
-      nextPoint = Point(curPoint.x + 1, curPoint.y)
-    }
-    else if (curDir == South()) {
-      nextPoint = Point(curPoint.x, curPoint.y - 1)
-    }
-    else if (curDir == North()) {
-      nextPoint = Point(curPoint.x, curPoint.y + 1)
-    }
-
-    nextPoint
+  def gameOver: Boolean = {
+    if(gameIsOver)
+      {
+        true
+      }
+    else
+      {
+        false
+      }
   }
 
-  def expandSnake(newCurPoint : Point) : Unit = {
-    snakeBody = newCurPoint :: snakeBody
-  }
+
+
+
   def step(): Unit = {
     var appleEaten = false
     curPoint = Point(curPoint.x + curDir.toPoint.x, curPoint.y + curDir.toPoint.y)
+
+    if(snakeBodyParts.contains(curPoint) && snakeBodyParts.last != curPoint)
+      {
+        gameIsOver = true
+      }
+
+
 
 
     if (curPoint.x == gridDims.width) {
@@ -70,12 +68,27 @@ class GameLogic(val random: RandomGenerator,
     }
 
     else if (curPoint == applePoint) {
-      applePoint = changeApplePoint()
       appleEaten = true
     }
 
-    val newCurPoint = computeNextPoint()
+    if (expansion < 3) {
+      snakeBodyParts = curPoint :: snakeBodyParts
+      expansion += 1
+    }
+    else {
+      snakeBodyParts = curPoint :: snakeBodyParts.init
+    }
 
+    if(appleEaten)
+      {
+        applePoint = changeApplePoint()
+        expansion = 0
+        appleEaten= false
+      }
+
+    if (gridDims.allPointsInside.size == snakeBodyParts.size) {
+      gameIsOver = true
+    }
 
 
 
@@ -88,23 +101,25 @@ class GameLogic(val random: RandomGenerator,
   def changeApplePoint(): Point = {
     var nrFreeSpots = 0
     var occupiedSpots = 0
+    val totalBoardSize = gridDims.allPointsInside.size
 
-    var freeSpots = ArrayBuffer[Point]()
+    val freeSpots = ArrayBuffer[Point]()
 
-    for(i <- gridDims.allPointsInside)
-      {
-        if(i != curPoint)
-          {
+
+
+        for(i <- gridDims.allPointsInside)
+        {
+          if (!(snakeBodyParts.contains(i))) {
             freeSpots += i
           }
-        if(i == curPoint)
-          {
+          else {
             occupiedSpots += 1
           }
-      }
+        }
 
 
-    nrFreeSpots = (gridDims.allPointsInside.size - 1) - occupiedSpots
+
+    nrFreeSpots = totalBoardSize - occupiedSpots
     val newSpot = freeSpots(random.randomInt(nrFreeSpots))
 
 
@@ -114,7 +129,10 @@ class GameLogic(val random: RandomGenerator,
 
 
 
-  def changeDir(d: Direction): Unit = (
+
+  def changeDir(d: Direction): Unit = {
+    checkIfOpposite(d)
+
 
     d match {
       case North() => curDir = North()
@@ -122,14 +140,22 @@ class GameLogic(val random: RandomGenerator,
       case East() => curDir = East()
       case South() => curDir = South()
     }
-    )
+  }
+
+  def checkIfOpposite(newDir : Direction) : Unit =
+    {
+      if(newDir == curDir.opposite)
+        {
+          gameIsOver = true
+        }
+    }
 
 
   def getCellType(p: Point): CellType = (
     if (p == curPoint) {
       SnakeHead(curDir)
     }
-    else if (snakeBody.contains(p)) {
+    else if (snakeBodyParts.contains(p)) {
       SnakeBody()
     }
 
