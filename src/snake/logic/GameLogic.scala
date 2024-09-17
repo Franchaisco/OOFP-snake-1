@@ -22,7 +22,7 @@ class GameLogic(val random: RandomGenerator,
   var curDir: Direction = East()
   var curPoint: Point = Point(2, 0)
   var applePoint: Point = changeApplePoint()
-//  var snakeBody:
+  var snakeBody: List[Point] = List[Point](Point(2, 0), Point(1, 0))
 
 
   def gameOver: Boolean = false
@@ -69,6 +69,10 @@ class GameLogic(val random: RandomGenerator,
       applePoint = changeApplePoint()
       appleEaten = true
     }
+
+    val newCurPoint = computeNextPoint()
+
+    snakeBody = newCurPoint :: snakeBody
 
 
 
@@ -125,6 +129,9 @@ class GameLogic(val random: RandomGenerator,
   def getCellType(p: Point): CellType = (
     if (p == curPoint) {
       SnakeHead(curDir)
+    }
+    else if (snakeBody.contains(p)) {
+      SnakeBody()
     }
 
 
