@@ -25,6 +25,8 @@ class GameLogic(val random: RandomGenerator,
   var applePoint: Point = changeApplePoint()
   var expansion = 3
   var gameIsOver = false
+  val curFrame : Frame = Frame(East(), Point(2, 0), List(Point(2, 0), Point(1, 0), Point(0, 0)), Point(3, 0))
+  val frameList : List[Frame] = List(curFrame)
 
 
 
@@ -39,21 +41,7 @@ class GameLogic(val random: RandomGenerator,
       }
   }
 
-
-
-
-  def step(): Unit = {
-    var appleEaten = false
-    curPoint = Point(curPoint.x + curDir.toPoint.x, curPoint.y + curDir.toPoint.y)
-
-    if(snakeBodyParts.contains(curPoint) && snakeBodyParts.last != curPoint)
-      {
-        gameIsOver = true
-      }
-
-
-
-
+  def handleWalls() : Unit = {
     if (curPoint.x == gridDims.width) {
       curPoint = Point(0, curPoint.y)
     }
@@ -66,6 +54,21 @@ class GameLogic(val random: RandomGenerator,
     else if (curPoint.y == gridDims.height) {
       curPoint = Point(curPoint.x, 0)
     }
+  }
+
+
+
+
+  def step(): Unit = {
+
+    var appleEaten = false
+    curPoint = Point(curPoint.x + curDir.toPoint.x, curPoint.y + curDir.toPoint.y)
+    handleWalls()
+
+    if(snakeBodyParts.contains(curPoint) && snakeBodyParts.last != curPoint)
+      {
+        gameIsOver = true
+      }
 
     else if (curPoint == applePoint) {
       appleEaten = true
@@ -89,7 +92,7 @@ class GameLogic(val random: RandomGenerator,
     if (gridDims.allPointsInside.size == snakeBodyParts.size) {
       gameIsOver = true
     }
-
+//    val newState : Frame = new Frame()
 
 
   }
@@ -158,21 +161,21 @@ class GameLogic(val random: RandomGenerator,
     else if (snakeBodyParts.contains(p)) {
       SnakeBody()
     }
-
-
-
     else if (p == applePoint) {
       Apple()
     }
-
     else {
       Empty()
     }
-
     )
 
 
   def setReverse(r: Boolean): Unit = ()
+
+}
+
+case class Frame(val curDir : Direction, val curPoint : Point, val snakeBody : List[Point], val applePoint : Point)
+{
 
 }
 
